@@ -8,7 +8,7 @@ $user_id = "user_demo_123";
 <head>
   <meta charset="UTF-8">
   <title>Agregar Tarjeta - Checkout</title>
-  <script src="js/payment_sdk_stable.min.js" charset="UTF-8"></script>
+  <script src="https://cdn.paymentez.com/ccapi/sdk/payment_sdk_stable.min.js" charset="UTF-8"></script>
   <style>
     #payment_example_div {
       max-width: 600px;
@@ -56,7 +56,7 @@ $user_id = "user_demo_123";
   <script>
     window.addEventListener('DOMContentLoaded', () => {
       if (typeof PaymentGateway === 'undefined') {
-        alert("SDK no cargó. Verifica entorno HTTPS.");
+        alert("SDK no cargó correctamente. Verifica que estás en entorno HTTPS.");
         return;
       }
 
