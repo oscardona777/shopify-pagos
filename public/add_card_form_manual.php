@@ -8,7 +8,7 @@ $user_id = "user_demo_123"; // ID único de usuario
 <head>
   <meta charset="UTF-8">
   <title>Agregar Tarjeta</title>
-  <script src="/js/payment_sdk_stable.min.js" charset="UTF-8"></script>
+  <script src="js/payment_sdk_stable.min.js" charset="UTF-8"></script>
   <style>
     body {
       background-color: #f3f4f6;
