@@ -1,24 +1,30 @@
 <?php
-// Configuración
-$server_app_code = "TESTECUADORSTG-EC-SERVER";
-$server_app_key = "67vVmLALRrbSaQHiEer40gjb49peos";
+// Credenciales CLIENTE (no servidor)
+$client_app_code = "TESTECUADORSTG-EC-CLIENT";
+$client_app_key = "d4pUmVHgVpw2mJ66rWwtfWaO2bAWV6";
 
-// Datos para el JSON
+// Timestamp actual
+$timestamp = time();
+
+// Token en formato base64 según documentación
+$auth_token = base64_encode("{$client_app_code};{$timestamp};{$client_app_key}");
+
+// Datos JSON que se enviarán
 $data = [
     "user" => [
-        "id" => "user_php_bypass_01",
-        "email" => "prueba@correo.com",
+        "id" => "user_php_bypass_cliente_01",
+        "email" => "cliente@correo.com",
         "country" => "EC"
     ],
     "amount" => 1.00,
     "currency" => "USD",
-    "description" => "Verificación directa sin SDK",
-    "reference" => "ref_php_" . time(),
+    "description" => "Verificación directa con credenciales de cliente",
+    "reference" => "ref_cli_" . time(),
     "installments" => 1,
     "billing" => [
-        "first_name" => "PHP",
-        "last_name" => "Bypass",
-        "address" => "Calle Falsa 123",
+        "first_name" => "Cliente",
+        "last_name" => "PHP",
+        "address" => "Av 123",
         "city" => "Quito",
         "zip_code" => "170101",
         "country" => "EC",
@@ -26,29 +32,21 @@ $data = [
     ]
 ];
 
-// Autenticación HMAC
-$uniq_token = uniqid();
-$timestamp = time();
-$auth_string = $server_app_code . $uniq_token . $timestamp;
-$auth_token = hash_hmac("sha256", $auth_string, $server_app_key);
-
 // Cabeceras
 $headers = [
     "Content-Type: application/json",
     "Auth-Token: {$auth_token}",
-    "Auth-Nonce: {$uniq_token}",
-    "Auth-Timestamp: {$timestamp}",
-    "Auth-App-Code: {$server_app_code}"
+    "Auth-Timestamp: {$timestamp}"
 ];
 
-// Inicializar cURL
+// Enviar solicitud con cURL
 $ch = curl_init("https://ccapi-stg.paymentez.com/v2/transaction/init_checkout");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
 
-// Ejecutar y mostrar resultado
+// Resultado
 $response = curl_exec($ch);
 $http_status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
