@@ -3,11 +3,10 @@
 $client_app_code = "TESTECUADORSTG-EC-CLIENT";
 $client_app_key = "d4pUmVHgVpw2mJ66rWwtfWaO2bAWV6";
 
-// Timestamp actual
+// Autenticación
 $timestamp = time();
-
-// Token en formato base64 según documentación
-$auth_token = base64_encode("{$client_app_code};{$timestamp};{$client_app_key}");
+$token_hash = hash('sha256', $client_app_key . $timestamp);
+$auth_token = base64_encode($client_app_code . ";" . $timestamp . ";" . $token_hash);
 
 // Datos JSON que se enviarán
 $data = [
