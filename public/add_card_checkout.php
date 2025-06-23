@@ -112,7 +112,7 @@ $user_email = "checkoutuser@example.com";
     });
 
     btn.addEventListener("click", function(e) {
-      paymentezCheckout.open({
+      const data = {
         user: {
           id: "<?php echo $user_id; ?>",
           email: "<?php echo $user_email; ?>",
@@ -132,7 +132,10 @@ $user_email = "checkoutuser@example.com";
           country: "EC",
           phone: "+593000000000"
         }
-      });
+      };
+
+      console.log("🧾 Objeto enviado al SDK:", data);
+      paymentezCheckout.open(data);
     });
   </script>
 </body>
