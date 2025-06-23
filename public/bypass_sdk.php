@@ -19,11 +19,13 @@ $data = [
         "email" => "cliente@correo.com",
         "country" => "EC"
     ],
+    "order" => [
     "amount" => 1.00,
-    "currency" => "USD",
     "description" => "Verificación directa con credenciales de cliente",
-    "reference" => "ref_cli_" . time(),
+    "dev_reference" => "ref_cli_" . time(),
     "installments" => 1,
+    "currency" => "USD"
+],
     "billing" => [
         "first_name" => "Cliente",
         "last_name" => "PHP",
