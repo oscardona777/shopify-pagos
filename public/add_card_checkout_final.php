@@ -51,8 +51,15 @@ $response = curl_exec($ch);
 $http_status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
-// Inicia estructura HTML
-echo "<!DOCTYPE html>
+// Procesar resultado
+$checkout_url = "#";
+if ($http_status == 200) {
+    $result = json_decode($response, true);
+    $checkout_url = $result["checkout_url"] ?? "#";
+}
+?>
+
+<!DOCTYPE html>
 <html lang='es'>
 <head>
   <meta charset='UTF-8'>
@@ -64,26 +71,18 @@ echo "<!DOCTYPE html>
     .btn:hover { background: #0053ba; }
   </style>
 </head>
-<body>";
-
-if ($http_status == 200) {
-    $result = json_decode($response, true);
-    $checkout_url = $result["checkout_url"] ?? "#";
-
-    echo "<h3>Haga clic para agregar su tarjeta</h3>
-    <button class='btn' onclick='openCheckout()'>Agregar tarjeta</button>
-    <script>
-      function openCheckout() {
-        if (typeof openModal === 'function') {
-          openModal("{$checkout_url}");
-        } else {
-          alert('El SDK de Paymentez no se ha cargado correctamente.');
-        }
+<body>
+  <h3>Haga clic para agregar su tarjeta</h3>
+  <button class='btn' onclick='openCheckout()'>Agregar tarjeta</button>
+  <script>
+    function openCheckout() {
+      const checkoutUrl = "<?php echo $checkout_url; ?>";
+      if (typeof openModal === 'function') {
+        openModal(checkoutUrl);
+      } else {
+        alert("El SDK de Paymentez no se ha cargado correctamente.");
       }
-    </script>";
-} else {
-    echo "<strong>Error {$http_status}</strong><pre>{$response}</pre>";
-}
-
-echo "</body></html>";
-?>
+    }
+  </script>
+</body>
+</html>
