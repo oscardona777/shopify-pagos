@@ -1,7 +1,7 @@
 <?php
 define("APP_CLIENT_CODE", "TESTECUADORSTG-EC-CLIENT");
 define("APP_CLIENT_KEY", "d4pUmVHgVpw2mJ66rWwtfWaO2bAWV6");
-$user_id = "user_demo_123";
+$user_id = "user_demo_456";
 ?>
 <!DOCTYPE html>
 <html lang="es">
