@@ -80,7 +80,7 @@ if ($http_status == 200) {
       if (typeof openModal === 'function') {
         openModal(checkoutUrl);
       } else {
-        alert("El SDK de Paymentez no se ha cargado correctamente.");
+        alert("El SDK de Paymentez no se ha cargado correctamente.")
       }
     }
   </script>
