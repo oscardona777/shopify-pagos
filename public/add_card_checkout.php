@@ -117,7 +117,10 @@ $user_email = "checkoutuser@example.com";
         user: {
           id: "<?php echo $user_id; ?>",
           email: "<?php echo $user_email; ?>"
-        }
+        },
+        amount: 1.00,
+        currency: "USD",
+        description: "Validación de tarjeta"
       });
     });
   </script>
