@@ -1,12 +1,16 @@
 <?php
-// Credenciales CLIENTE (no servidor)
 $client_app_code = "TESTECUADORSTG-EC-CLIENT";
 $client_app_key = "d4pUmVHgVpw2mJ66rWwtfWaO2bAWV6";
-
-// Autenticación
 $timestamp = time();
-$token_hash = hash('sha256', $client_app_key . $timestamp);
-$auth_token = base64_encode($client_app_code . ";" . $timestamp . ";" . $token_hash);
+
+$raw_string = "{$client_app_code};{$timestamp};{$client_app_key}";
+$auth_token = base64_encode($raw_string);
+
+$headers = [
+  "Content-Type: application/json",
+  "Auth-Token: {$auth_token}",
+  "Auth-Timestamp: {$timestamp}"
+];
 
 // Datos JSON que se enviarán
 $data = [
@@ -29,13 +33,6 @@ $data = [
         "country" => "EC",
         "phone" => "+593000000000"
     ]
-];
-
-// Cabeceras
-$headers = [
-    "Content-Type: application/json",
-    "Auth-Token: {$auth_token}",
-    "Auth-Timestamp: {$timestamp}"
 ];
 
 // Enviar solicitud con cURL
