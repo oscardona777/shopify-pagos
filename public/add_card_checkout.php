@@ -89,7 +89,6 @@ $user_email = "checkoutuser@example.com";
         }
         responseDiv.textContent = JSON.stringify(response, null, 2);
 
-        // ✅ Verificar tarjeta automáticamente
         if (response.card && response.card.token) {
           fetch("verify_card.php", {
             method: "POST",
@@ -116,11 +115,19 @@ $user_email = "checkoutuser@example.com";
       paymentezCheckout.open({
         user: {
           id: "<?php echo $user_id; ?>",
-          email: "<?php echo $user_email; ?>"
+          email: "<?php echo $user_email; ?>",
+          country: "EC"
         },
         amount: 1.00,
         currency: "USD",
-        description: "Validación de tarjeta"
+        description: "Validación de tarjeta",
+        reference: "verify_" + Date.now(),
+        installments: 1,
+        billing: {
+          first_name: "Test",
+          last_name: "User",
+          phone: "+593000000000"
+        }
       });
     });
   </script>
