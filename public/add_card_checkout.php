@@ -126,6 +126,10 @@ $user_email = "checkoutuser@example.com";
         billing: {
           first_name: "Test",
           last_name: "User",
+          address: "Av. Siempre Viva 742",
+          city: "Quito",
+          zip_code: "170101",
+          country: "EC",
           phone: "+593000000000"
         }
       });
