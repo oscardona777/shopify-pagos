@@ -1,13 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Test Checkout SDK</title>
+  <title>Test SDK Paymentez</title>
   <script src="https://cdn.paymentez.com/ccapi/sdk/payment_checkout_stable.min.js" charset="UTF-8"></script>
 </head>
 <body>
-  <button id="testBtn">Abrir Modal</button>
+  <h2>Test SDK Paymentez - Add Card via Checkout</h2>
+  <button id="testBtn">Agregar Tarjeta</button>
   <pre id="response"></pre>
+
   <script>
     const btn = document.getElementById("testBtn");
     const responseBox = document.getElementById("response");
@@ -32,8 +34,8 @@
         },
         amount: 1.00,
         currency: "USD",
-        description: "Validación",
-        reference: "ref_" + Date.now(),
+        description: "Validación de tarjeta",
+        reference: "verify_" + Date.now(),
         installments: 1,
         billing: {
           first_name: "HTML",
