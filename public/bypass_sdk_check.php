@@ -3,11 +3,9 @@
 $client_app_code = "TESTECUADORSTG-EC-CLIENT";
 $client_app_key = "d4pUmVHgVpw2mJ66rWwtfWaO2bAWV6";
 
-// Timestamp actual
 $timestamp = time();
-
-// Autenticación sin hash (base64 plano)
-$auth_token = base64_encode("{$client_app_code};{$timestamp};{$client_app_key}");
+$token_hash = hash('sha256', $client_app_key . $timestamp);
+$auth_token = base64_encode("{$client_app_code};{$timestamp};{$token_hash}");
 
 // Estructura JSON válida (según documentación oficial)
 $data = [
