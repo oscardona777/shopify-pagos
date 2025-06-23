@@ -1,6 +1,6 @@
 <?php
-define("APP_CLIENT_CODE", "INTEGRATION_APP_CODE");
-define("APP_CLIENT_KEY", "INTEGRATION_APP_KEY");
+define("APP_CLIENT_CODE", "TESTECUADORSTG-EC-CLIENT");
+define("APP_CLIENT_KEY", "d4pUmVHgVpw2mJ66rWwtfWaO2bAWV6");
 $user_id = "user_demo_123";
 ?>
 <!DOCTYPE html>
