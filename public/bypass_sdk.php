@@ -15,17 +15,17 @@ $headers = [
 // Datos JSON que se enviarán
 $data = [
     "user" => [
-        "id" => "user_php_bypass_cliente_01",
+        "id" => "user_php_bypass_cliente_02",
         "email" => "cliente@correo.com",
         "country" => "EC"
     ],
     "order" => [
-    "amount" => 1.00,
-    "description" => "Verificación directa con credenciales de cliente",
-    "dev_reference" => "ref_cli_" . time(),
-    "installments" => 1,
-    "currency" => "USD"
-],
+        "amount" => 1.00,
+        "description" => "Verificación directa con credenciales de cliente",
+        "dev_reference" => "ref_cli_" . time(),
+        "installments" => 1,
+        "currency" => "USD"
+    ],
     "billing" => [
         "first_name" => "Cliente",
         "last_name" => "PHP",
