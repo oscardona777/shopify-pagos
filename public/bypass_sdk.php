@@ -1,18 +1,13 @@
 <?php
+// Credenciales CLIENTE (correctas para init_checkout)
 $client_app_code = "TESTECUADORSTG-EC-CLIENT";
 $client_app_key = "d4pUmVHgVpw2mJ66rWwtfWaO2bAWV6";
+
+// Timestamp y Auth-Token base64 (no HMAC)
 $timestamp = time();
+$auth_token = base64_encode("{$client_app_code};{$timestamp};{$client_app_key}");
 
-$raw_string = "{$client_app_code};{$timestamp};{$client_app_key}";
-$auth_token = base64_encode($raw_string);
-
-$headers = [
-  "Content-Type: application/json",
-  "Auth-Token: {$auth_token}",
-  "Auth-Timestamp: {$timestamp}"
-];
-
-// Datos JSON que se enviarán
+// JSON corregido: incluye el campo obligatorio "order"
 $data = [
     "user" => [
         "id" => "user_php_bypass_cliente_02",
@@ -37,14 +32,21 @@ $data = [
     ]
 ];
 
-// Enviar solicitud con cURL
+// Cabeceras válidas
+$headers = [
+    "Content-Type: application/json",
+    "Auth-Token: {$auth_token}",
+    "Auth-Timestamp: {$timestamp}"
+];
+
+// cURL request
 $ch = curl_init("https://ccapi-stg.paymentez.com/v2/transaction/init_checkout");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
 
-// Resultado
+// Ejecutar y mostrar resultado
 $response = curl_exec($ch);
 $http_status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
