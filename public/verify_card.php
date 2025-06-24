@@ -1,17 +1,38 @@
 <?php
-$server_app_code = "TESTECUADORSTG-EC-SERVER";
-$server_app_key = "67vVmLALRrbSaQHiEer40gjb49peos";
+$client_app_code = "TESTECUADORSTG-EC-CLIENT";
+$client_app_key = "d4pUmVHgVpw2mJ66rWwtfWaO2bAWV6";
 
-$reference = $_GET['reference'] ?? null;
-
-if (!$reference) {
-    echo "❌ Error: Falta el parámetro 'reference' en la URL.";
-    exit;
-}
-
+// Generar token de autenticación
 $timestamp = time();
-$token_hash = hash('sha256', $server_app_key . $timestamp);
-$auth_token = base64_encode("{\$server_app_code};{\$timestamp};{\$token_hash}");
+$token_hash = hash("sha256", $client_app_key . $timestamp);
+$auth_token = base64_encode($client_app_code . ";" . $timestamp . ";" . $token_hash);
+
+// Datos para verificación (se recomienda usar datos del cliente real en producción)
+$verify_data = array(
+    "user" => array(
+        "id" => "user_checkout_001",
+        "email" => "cliente@example.com",
+        "country" => "EC"
+    ),
+    "order" => array(
+        "amount" => 1.00,
+        "description" => "Verificación de tarjeta",
+        "dev_reference" => "verify_" . $timestamp,
+        "installments" => 1,
+        "currency" => "USD"
+    ),
+    "billing" => array(
+        "first_name" => "Cliente",
+        "last_name" => "Demo",
+        "address" => "Av. Principal 123",
+        "city" => "Quito",
+        "zip_code" => "170101",
+        "country" => "EC",
+        "phone" => "+593000000000"
+    )
+);
+
+$payload = json_encode($verify_data);
 
 $headers = array(
     "Content-Type: application/json",
@@ -19,15 +40,70 @@ $headers = array(
     "Auth-Timestamp: " . $timestamp
 );
 
-$url = "https://ccapi-stg.paymentez.com/v2/transaction/get_by_reference?dev_reference=" . urlencode($reference);
-$ch = curl_init($url);
+// Ejecutar cURL
+$ch = curl_init("https://ccapi-stg.paymentez.com/v2/transaction/init_checkout");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
 $response = curl_exec($ch);
 $http_status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
-header("Content-Type: application/json; charset=utf-8");
-http_response_code($http_status);
-echo $response;
+$checkout_url = "#";
+if ($http_status == 200) {
+    $result = json_decode($response, true);
+    if (isset($result["checkout_url"])) {
+        $checkout_url = $result["checkout_url"];
+    }
+}
 ?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Verificar Tarjeta</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .btn { background: #28a745; color: white; padding: 10px 20px; border: none; cursor: pointer; font-size: 16px; }
+    .btn:hover { background: #218838; }
+    #error-msg { color: red; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h3>Verificar Tarjeta vía Checkout</h3>
+  <button id="verify-btn" class="btn">Verificar tarjeta</button>
+  <div id="error-msg"></div>
+
+  <script src="https://cdn.paymentez.com/ccapi/sdk/payment_checkout_stable.min.js"
+          onload="sdkReady()" onerror="sdkFailed()"></script>
+
+  <script>
+    function sdkReady() {
+      var url = "<?php echo $checkout_url; ?>";
+      if (!url || url === "#") {
+        showError("❌ No se pudo generar el enlace de verificación.");
+        return;
+      }
+
+      var btn = document.getElementById("verify-btn");
+      btn.addEventListener("click", function () {
+        if (typeof openModal === "function") {
+          openModal(url);
+        } else {
+          showError("❌ La función openModal no está disponible.");
+        }
+      });
+    }
+
+    function sdkFailed() {
+      showError("❌ Error al cargar el SDK de Paymentez.");
+    }
+
+    function showError(msg) {
+      console.error(msg);
+      document.getElementById("error-msg").textContent = msg;
+    }
+  </script>
+</body>
+</html>
