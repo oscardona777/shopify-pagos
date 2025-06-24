@@ -1,11 +1,14 @@
 <?php
+// Credenciales del entorno sandbox
 $client_app_code = "TESTECUADORSTG-EC-CLIENT";
 $client_app_key  = "d4pUmVHgVpw2mJ66rWwtfWaO2bAWV6";
 
+// Generar Auth-Token
 $timestamp = time();
 $token_hash = hash("sha256", $client_app_key . $timestamp);
 $auth_token = base64_encode($client_app_code . ";" . $timestamp . ";" . $token_hash);
 
+// Estructura de datos para la creación del checkout
 $data = array(
   "user" => array(
     "id" => "user_checkout_001",
@@ -32,12 +35,14 @@ $data = array(
 
 $payload = json_encode($data);
 
+// Encabezados
 $headers = array(
   "Content-Type: application/json",
   "Auth-Token: " . $auth_token,
   "Auth-Timestamp: " . $timestamp
 );
 
+// Enviar solicitud cURL
 $ch = curl_init("https://ccapi-stg.paymentez.com/v2/transaction/init_checkout");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_POST, true);
@@ -47,12 +52,17 @@ $response = curl_exec($ch);
 $http_status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
-$checkout_url = "#";
+// Verificar respuesta
+$checkout_url = "";
 if ($http_status == 200) {
   $result = json_decode($response, true);
-  if (isset($result["checkout_url"])) {
+  if (!empty($result["checkout_url"])) {
     $checkout_url = $result["checkout_url"];
+  } else {
+    error_log("❌ No se recibió checkout_url: " . $response);
   }
+} else {
+  error_log("❌ HTTP $http_status - Respuesta: " . $response);
 }
 ?>
 <!DOCTYPE html>
@@ -88,9 +98,10 @@ if ($http_status == 200) {
     }
 
     function sdkReady() {
-      console.log("✅ SDK cargado correctamente.");
+      console.log("✅ SDK cargado correctamente");
 
       const url = "<?php echo $checkout_url; ?>";
+
       if (!url || url === "#") {
         showError("No se pudo generar el enlace de checkout.");
         return;
@@ -104,10 +115,10 @@ if ($http_status == 200) {
 
       btn.addEventListener("click", function () {
         if (typeof openModal === "function") {
-          console.log("🔔 Abriendo modal con URL:", url);
+          console.log("🔔 Abriendo modal con:", url);
           openModal(url);
         } else {
-          showError("La función openModal no está disponible.");
+          showError("La función openModal no está disponible. Verifica si el SDK cargó correctamente.");
         }
       });
     }
@@ -116,7 +127,7 @@ if ($http_status == 200) {
       showError("Error al cargar el SDK de Paymentez.");
     }
 
-    // Cargar el SDK dinámicamente
+    // Cargar SDK dinámicamente
     document.addEventListener("DOMContentLoaded", function () {
       const script = document.createElement("script");
       script.src = "https://cdn.paymentez.com/ccapi/sdk/payment_checkout_stable.min.js";
@@ -125,5 +136,6 @@ if ($http_status == 200) {
       document.body.appendChild(script);
     });
   </script>
+
 </body>
 </html>
