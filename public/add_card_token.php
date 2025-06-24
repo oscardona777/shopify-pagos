@@ -1,4 +1,4 @@
-<!-- === add_card_token.html === -->
+<?php // === add_card_token.php === ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -10,7 +10,7 @@
     #form-container { margin-top: 20px; max-width: 400px; }
     .form-group { margin-bottom: 10px; }
     button { padding: 10px 20px; background: #1a73e8; color: white; border: none; cursor: pointer; }
-    #result { margin-top: 20px; }
+    #result { margin-top: 20px; white-space: pre-wrap; }
   </style>
 </head>
 <body>
@@ -22,7 +22,7 @@
 <div id="result"></div>
 
 <script>
-  const APP_CODE = "<?php echo $client_app_code; ?>";
+  const APP_CODE = "<?php include 'config.php'; echo $client_app_code; ?>";
   const APP_KEY = "<?php echo $client_app_key; ?>";
 
   const pg = new PaymentGateway('stg', APP_CODE, APP_KEY);
@@ -47,7 +47,7 @@
     .then(res => res.json())
     .then(data => {
       console.log('🔁 Respuesta verificación:', data);
-      document.getElementById("result").innerHTML += '<br><strong>Verificación:</strong> ' + JSON.stringify(data);
+      document.getElementById("result").innerHTML += '\n\nVerificación: ' + JSON.stringify(data, null, 2);
     })
     .catch(err => console.error("❌ Error en verificación:", err));
 
