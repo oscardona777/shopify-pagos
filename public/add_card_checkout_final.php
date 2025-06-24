@@ -3,8 +3,9 @@ $client_app_code = "TESTECUADORSTG-EC-CLIENT";
 $client_app_key = "d4pUmVHgVpw2mJ66rWwtfWaO2bAWV6";
 $timestamp = time();
 $token_hash = hash('sha256', $client_app_key . $timestamp);
-$auth_token = base64_encode($client_app_code . ";" . $timestamp . ";" . $token_hash);
+$auth_token = base64_encode("{$client_app_code};{$timestamp};{$token_hash}");
 
+// Estructura del payload
 $order_data = array(
     "user" => array(
         "id" => "user_checkout_001",
@@ -37,6 +38,7 @@ $headers = array(
     "Auth-Timestamp: " . $timestamp
 );
 
+// Ejecutar cURL
 $ch = curl_init("https://ccapi-stg.paymentez.com/v2/transaction/init_checkout");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_POST, true);
@@ -47,7 +49,7 @@ $http_status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
 $checkout_url = "#";
-if ($http_status === 200) {
+if ($http_status == 200) {
     $result = json_decode($response, true);
     if (isset($result["checkout_url"])) {
         $checkout_url = $result["checkout_url"];
@@ -75,15 +77,19 @@ if ($http_status === 200) {
           onload="sdkReady()" onerror="sdkFailed()"></script>
 
   <script>
-    var url = "<?php echo $checkout_url; ?>";
-
     function sdkReady() {
-      console.log("✅ SDK cargado");
-      document.getElementById("checkout-btn").addEventListener("click", function () {
+      var url = "<?php echo $checkout_url; ?>";
+      if (!url || url === "#") {
+        showError("❌ No se pudo generar el enlace de checkout.");
+        return;
+      }
+
+      var btn = document.getElementById("checkout-btn");
+      btn.addEventListener("click", function () {
         if (typeof openModal === "function") {
           openModal(url);
         } else {
-          showError("La función openModal no está disponible.");
+          showError("❌ La función openModal no está disponible.");
         }
       });
     }
