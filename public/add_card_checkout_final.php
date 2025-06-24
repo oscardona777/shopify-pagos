@@ -3,7 +3,7 @@ $client_app_code = "TESTECUADORSTG-EC-CLIENT";
 $client_app_key = "d4pUmVHgVpw2mJ66rWwtfWaO2bAWV6";
 $timestamp = time();
 $token_hash = hash('sha256', $client_app_key . $timestamp);
-$auth_token = base64_encode($client_app_code . ";" . $timestamp . ";" . $token_hash);
+$auth_token = base64_encode("{$client_app_code};{$timestamp};{$token_hash}");
 
 $data = json_encode({
     "user": {
