@@ -37,3 +37,9 @@
         error: function(error) {
           console.error("Add card error:", error);
           alert("Error: " + JSON.stringify(error));
+        }
+      });
+    }
+  </script>
+</body>
+</html>
