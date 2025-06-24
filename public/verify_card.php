@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // === verify_card.php ===
 include 'config.php';
 
