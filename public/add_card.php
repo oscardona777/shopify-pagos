@@ -16,30 +16,24 @@
 
   <script>
     function addCard() {
-      const paymentez = new PaymentezCheckout({
-        app_code_client: "<?php echo PAYMENTEZ_APP_CODE; ?>",
-        app_key_client: "<?php echo PAYMENTEZ_APP_KEY; ?>",
-        env_mode: "<?php echo PAYMENTEZ_SANDBOX ? 'stg' : 'prod'; ?>"
-      });
+      Paymentez.init(
+        "<?php echo PAYMENTEZ_APP_CODE; ?>",
+        "<?php echo PAYMENTEZ_APP_KEY; ?>",
+        "<?php echo PAYMENTEZ_SANDBOX ? 'stg' : 'prod'; ?>"
+      );
 
-      paymentez.addCard({
-        user_id: 'user123',
-        user_email: 'test@test.com',
-        card_number: document.getElementById('card_number').value,
-        holder_name: document.getElementById('holder_name').value,
-        expiry_month: document.getElementById('expiry_month').value,
-        expiry_year: document.getElementById('expiry_year').value,
-        cvv: document.getElementById('cvv').value,
-        success: function(card_response) {
-          console.log('Card added successfully:', card_response);
-          alert("Token: " + card_response.card.token);
+      Paymentez.addCard({
+        user_id: "user123",
+        user_email: "test@test.com",
+        card_number: document.getElementById("card_number").value,
+        holder_name: document.getElementById("holder_name").value,
+        expiry_month: document.getElementById("expiry_month").value,
+        expiry_year: document.getElementById("expiry_year").value,
+        cvv: document.getElementById("cvv").value,
+        success: function(response) {
+          console.log("Card added:", response);
+          alert("Token: " + response.card.token);
         },
-        error: function(err) {
-          console.error("Error adding card:", err);
-          alert("Error: " + JSON.stringify(err));
-        }
-      });
-    }
-  </script>
-</body>
-</html>
+        error: function(error) {
+          console.error("Add card error:", error);
+          alert("Error: " + JSON.stringify(error));
