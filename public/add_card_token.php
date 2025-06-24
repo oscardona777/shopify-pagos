@@ -22,8 +22,8 @@
 <div id="result"></div>
 
 <script>
-  const APP_CODE = "<?php include 'config.php'; echo $client_app_code; ?>";
-  const APP_KEY = "<?php echo $client_app_key; ?>";
+  const APP_CODE = "<?php include 'config.php'; echo addslashes($client_app_code); ?>";
+  const APP_KEY = "<?php echo addslashes($client_app_key); ?>";
 
   const pg = new PaymentGateway('stg', APP_CODE, APP_KEY);
 
