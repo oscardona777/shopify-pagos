@@ -36,6 +36,11 @@ $payload = [
     ],
     "card" => [
         "token" => $card_token
+    ],
+    "configuration" => [
+        "partial_payment" => false,
+        "expiration_days" => 1,
+        "allowed_payment_methods" => ["card"]
     ]
 ];
 
