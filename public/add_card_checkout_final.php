@@ -5,7 +5,7 @@ $timestamp = time();
 $token_hash = hash('sha256', $client_app_key . $timestamp);
 $auth_token = base64_encode($client_app_code . ";" . $timestamp . ";" . $token_hash);
 
-$data = json_encode(array(
+$order_data = array(
     "user" => array(
         "id" => "user_checkout_001",
         "email" => "cliente@example.com",
@@ -27,7 +27,9 @@ $data = json_encode(array(
         "country" => "EC",
         "phone" => "+593000000000"
     )
-));
+);
+
+$payload = json_encode($order_data);
 
 $headers = array(
     "Content-Type: application/json",
@@ -39,7 +41,7 @@ $ch = curl_init("https://ccapi-stg.paymentez.com/v2/transaction/init_checkout");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
 $response = curl_exec($ch);
 $http_status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
@@ -47,7 +49,9 @@ curl_close($ch);
 $checkout_url = "#";
 if ($http_status === 200) {
     $result = json_decode($response, true);
-    $checkout_url = isset($result["checkout_url"]) ? $result["checkout_url"] : "#";
+    if (isset($result["checkout_url"])) {
+        $checkout_url = $result["checkout_url"];
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -71,7 +75,7 @@ if ($http_status === 200) {
           onload="sdkReady()" onerror="sdkFailed()"></script>
 
   <script>
-    const url = "<?php echo $checkout_url; ?>";
+    var url = "<?php echo $checkout_url; ?>";
 
     function sdkReady() {
       console.log("✅ SDK cargado");
