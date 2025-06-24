@@ -3,31 +3,31 @@ $client_app_code = "TESTECUADORSTG-EC-CLIENT";
 $client_app_key = "d4pUmVHgVpw2mJ66rWwtfWaO2bAWV6";
 $timestamp = time();
 $token_hash = hash('sha256', $client_app_key . $timestamp);
-$auth_token = base64_encode("{$client_app_code};{$timestamp};{$token_hash}");
+$auth_token = base64_encode($client_app_code . ";" . $timestamp . ";" . $token_hash);
 
-$data = json_encode({
-    "user": {
-        "id": "user_checkout_001",
-        "email": "cliente@example.com",
-        "country": "EC"
-    },
-    "order": {
-        "amount": 1.0,
-        "description": "Validaci\u00f3n tarjeta via Checkout",
-        "dev_reference": "checkout_1750728902",
-        "installments": 1,
-        "currency": "USD"
-    },
-    "billing": {
-        "first_name": "Cliente",
-        "last_name": "Demo",
-        "address": "Av. Principal 123",
-        "city": "Quito",
-        "zip_code": "170101",
-        "country": "EC",
-        "phone": "+593000000000"
-    }
-});
+$data = json_encode(array(
+    "user" => array(
+        "id" => "user_checkout_001",
+        "email" => "cliente@example.com",
+        "country" => "EC"
+    ),
+    "order" => array(
+        "amount" => 1.00,
+        "description" => "Validación tarjeta via Checkout",
+        "dev_reference" => "checkout_" . $timestamp,
+        "installments" => 1,
+        "currency" => "USD"
+    ),
+    "billing" => array(
+        "first_name" => "Cliente",
+        "last_name" => "Demo",
+        "address" => "Av. Principal 123",
+        "city" => "Quito",
+        "zip_code" => "170101",
+        "country" => "EC",
+        "phone" => "+593000000000"
+    )
+));
 
 $headers = array(
     "Content-Type: application/json",
@@ -47,7 +47,7 @@ curl_close($ch);
 $checkout_url = "#";
 if ($http_status === 200) {
     $result = json_decode($response, true);
-    $checkout_url = $result["checkout_url"] ?? "#";
+    $checkout_url = isset($result["checkout_url"]) ? $result["checkout_url"] : "#";
 }
 ?>
 <!DOCTYPE html>
