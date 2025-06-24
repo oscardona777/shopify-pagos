@@ -1,56 +1,98 @@
 <?php
-define("APP_CLIENT_CODE", "TESTECUADORSTG-EC-CLIENT");
-define("APP_CLIENT_KEY", "d4pUmVHgVpw2mJ66rWwtfWaO2bAWV6");
-$user_id = "user_test_checkout_01";
-$user_email = "checkoutuser@example.com";
+$client_app_code = "TESTECUADORSTG-EC-CLIENT";
+$client_app_key = "d4pUmVHgVpw2mJ66rWwtfWaO2bAWV6";
+$timestamp = time();
+$token_hash = hash('sha256', $client_app_key . $timestamp);
+$auth_token = base64_encode("{$client_app_code};{$timestamp};{$token_hash}");
+
+$data = [
+    "user" => [
+        "id" => "user_checkout_001",
+        "email" => "cliente@example.com",
+        "country" => "EC"
+    ],
+    "order" => [
+        "amount" => 1.00,
+        "description" => "Validación tarjeta via Checkout",
+        "dev_reference" => "checkout_" . $timestamp,
+        "installments" => 1,
+        "currency" => "USD"
+    ],
+    "billing" => [
+        "first_name" => "Cliente",
+        "last_name" => "Demo",
+        "address" => "Av. Principal 123",
+        "city" => "Quito",
+        "zip_code" => "170101",
+        "country" => "EC",
+        "phone" => "+593000000000"
+    ]
+];
+
+$headers = [
+    "Content-Type: application/json",
+    "Auth-Token: {$auth_token}",
+    "Auth-Timestamp: {$timestamp}"
+];
+
+$ch = curl_init("https://ccapi-stg.paymentez.com/v2/transaction/init_checkout");
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+$response = curl_exec($ch);
+$http_status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+
+$checkout_url = "#";
+if ($http_status === 200) {
+    $result = json_decode($response, true);
+    $checkout_url = $result["checkout_url"] ?? "#";
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Agregar Tarjeta - Checkout</title>
-  <script src="https://cdn.paymentez.com/ccapi/sdk/payment_checkout_stable.min.js" charset="UTF-8"></script>
+  <title>Agregar Tarjeta</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .btn { background: #0069d9; color: white; padding: 10px 20px; border: none; cursor: pointer; font-size: 16px; }
+    .btn:hover { background: #0053ba; }
+    #error-msg { color: red; margin-top: 20px; }
+  </style>
 </head>
 <body>
-  <button id="add_card_btn">Agregar tarjeta</button>
-  <div id="response"></div>
+  <h3>Validar Tarjeta vía Checkout</h3>
+  <button id="checkout-btn" class="btn">Agregar tarjeta</button>
+  <div id="error-msg"></div>
+
+  <script src="https://cdn.paymentez.com/ccapi/sdk/payment_checkout_stable.min.js"
+          onload="sdkReady()" onerror="sdkFailed()"></script>
+
   <script>
-    const btn = document.getElementById("add_card_btn");
-    const responseDiv = document.getElementById("response");
+    const url = "<?php echo $checkout_url; ?>";
 
-    const paymentezCheckout = new PaymentCheckout.modal({
-      client_app_code: "<?php echo APP_CLIENT_CODE; ?>",
-      client_app_key: "<?php echo APP_CLIENT_KEY; ?>",
-      locale: "es",
-      env_mode: "stg",
-      onResponse: response => {
-        console.log("Respuesta del modal:", response);
-        responseDiv.textContent = JSON.stringify(response, null, 2);
-      }
-    });
-
-    btn.addEventListener("click", () => {
-      const data = {
-        user: { id: "<?php echo $user_id; ?>", email: "<?php echo $user_email; ?>", country: "EC" },
-        amount: 1.00,
-        currency: "USD",
-        description: "Validación de tarjeta",
-        reference: "verify_" + Date.now(),
-        installments: 1,
-        billing: {
-          first_name: "Test",
-          last_name: "User",
-          address: "Av. Siempre Viva 742",
-          city: "Quito",
-          zip_code: "170101",
-          country: "EC",
-          phone: "+593000000000"
+    function sdkReady() {
+      console.log("✅ SDK cargado");
+      document.getElementById("checkout-btn").addEventListener("click", function () {
+        if (typeof openModal === "function") {
+          openModal(url);
+        } else {
+          showError("La función openModal no está disponible.");
         }
-      };
+      });
+    }
 
-      console.log("🧾 Data enviada:", JSON.stringify(data, null, 2));
-      paymentezCheckout.open(data);
-    });
+    function sdkFailed() {
+      showError("❌ Error al cargar el SDK de Paymentez.");
+    }
+
+    function showError(msg) {
+      console.error(msg);
+      document.getElementById("error-msg").textContent = msg;
+    }
   </script>
 </body>
 </html>
