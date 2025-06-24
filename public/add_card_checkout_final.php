@@ -1,6 +1,6 @@
 <?php
 $client_app_code = "TESTECUADORSTG-EC-CLIENT";
-$client_app_key = "d4pUmVHgVpw2mJ66rWwtfWaO2bAWV6";
+$client_app_key  = "d4pUmVHgVpw2mJ66rWwtfWaO2bAWV6";
 
 $timestamp = time();
 $token_hash = hash("sha256", $client_app_key . $timestamp);
@@ -62,45 +62,63 @@ if ($http_status == 200) {
   <title>Agregar Tarjeta</title>
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; }
-    .btn { background: #007bff; color: white; padding: 10px 20px; border: none; cursor: pointer; font-size: 16px; }
+    .btn {
+      background: #007bff;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      border-radius: 5px;
+    }
     .btn:hover { background: #0056b3; }
     #error-msg { color: red; margin-top: 20px; }
   </style>
 </head>
 <body>
+
   <h3>Agregar tarjeta vía Checkout</h3>
   <button id="checkout-btn" class="btn">Agregar tarjeta</button>
   <div id="error-msg"></div>
 
   <script>
     function showError(msg) {
-      console.error(msg);
+      console.error("❌ Error:", msg);
       document.getElementById("error-msg").textContent = msg;
     }
 
     function sdkReady() {
-      var url = "<?php echo $checkout_url; ?>";
+      console.log("✅ SDK cargado correctamente.");
+
+      const url = "<?php echo $checkout_url; ?>";
       if (!url || url === "#") {
-        showError("❌ No se pudo generar el enlace de checkout.");
+        showError("No se pudo generar el enlace de checkout.");
         return;
       }
 
-      var btn = document.getElementById("checkout-btn");
+      const btn = document.getElementById("checkout-btn");
+      if (!btn) {
+        showError("Botón no encontrado en el DOM.");
+        return;
+      }
+
       btn.addEventListener("click", function () {
         if (typeof openModal === "function") {
+          console.log("🔔 Abriendo modal con URL:", url);
           openModal(url);
         } else {
-          showError("❌ La función openModal no está disponible.");
+          showError("La función openModal no está disponible.");
         }
       });
     }
 
     function sdkFailed() {
-      showError("❌ Error al cargar el SDK de Paymentez.");
+      showError("Error al cargar el SDK de Paymentez.");
     }
 
-    window.addEventListener("DOMContentLoaded", function () {
-      var script = document.createElement("script");
+    // Cargar el SDK dinámicamente
+    document.addEventListener("DOMContentLoaded", function () {
+      const script = document.createElement("script");
       script.src = "https://cdn.paymentez.com/ccapi/sdk/payment_checkout_stable.min.js";
       script.onload = sdkReady;
       script.onerror = sdkFailed;
