@@ -1,67 +1,78 @@
 
 <?php
-// config.php
-$client_app_code = "TESTECUADORSTG-EC-CLIENT";
-$client_app_key  = "d4pUmVHgVpw2mJ66rWwtfWaO2bAWV6";
+include 'config.php';
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Agregar tarjeta</title>
+  <title>Agregar Tarjeta</title>
   <script src="https://cdn.paymentez.com/ccapi/sdk/payment_sdk_stable.min.js"></script>
   <style>
-    body { font-family: Arial; padding: 20px; }
-    .form-group { margin-bottom: 15px; }
-    button { padding: 10px 20px; background: #007BFF; color: white; border: none; cursor: pointer; }
-    #form-container { margin-top: 20px; max-width: 400px; }
-    #result { margin-top: 20px; white-space: pre-wrap; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      padding: 20px;
+    }
+    #card-form {
+      max-width: 400px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    #btnAddCard {
+      width: 100%;
+      background-color: #0a74da;
+      color: #fff;
+      border: none;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #333;
+    }
   </style>
 </head>
 <body>
-<h2>Agregar tarjeta</h2>
+  <div id="card-form"></div>
+  <button id="btnAddCard">Agregar Tarjeta</button>
+  <div id="result"></div>
 
-<div id="form-container"></div>
-<button id="add-card-btn">Agregar tarjeta</button>
+  <script>
+    const paymentez = new PaymentSDK(
+      "<?php echo addslashes(APP_CLIENT_CODE); ?>",
+      "<?php echo addslashes(APP_CLIENT_KEY); ?>",
+      true
+    );
 
-<div id="result"></div>
-
-<script>
-  const APP_CODE = "<?php echo $client_app_code; ?>";
-  const APP_KEY = "<?php echo $client_app_key; ?>";
-
-  const paymentez = new PaymentGateway('stg', APP_CODE, APP_KEY);
-
-  paymentez.generate_tokenize(
-    {
-      user_id: "user-001",
-      email: "cliente@ejemplo.com",
-      cookie: true
-    },
-    '#form-container',
-    function (response) {
-      document.getElementById("result").innerText = "✅ Token generado: " + response.card.token;
-
-      fetch('verify_card.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ card_token: response.card.token })
-      })
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById("result").innerText += "\n\n🔁 Verificación:\n" + JSON.stringify(data, null, 2);
-      })
-      .catch(err => console.error('❌ Error en verificación:', err));
-    },
-    function (error) {
-      console.error('❌ Error en generación de token:', error);
-      document.getElementById("result").innerText = "❌ Error al generar token.";
-    }
-  );
-
-  document.getElementById("add-card-btn").addEventListener("click", function () {
-    paymentez.tokenize();
-  });
-</script>
+    document.getElementById("btnAddCard").addEventListener("click", function () {
+      paymentez.addCard({
+        user: {
+          id: "user-001",
+          email: "cliente@ejemplo.com"
+        },
+        configuration: {
+          partial_payment: false,
+          expiration_days: 1,
+          allowed_payment_methods: ["card"]
+        },
+        containerID: "card-form",
+        onSuccess: function (response) {
+          document.getElementById("result").innerText = "✅ Tarjeta agregada con éxito. Token: " + response.card.token;
+          console.log("✅ Success:", response);
+        },
+        onError: function (error) {
+          document.getElementById("result").innerText = "❌ Error: " + JSON.stringify(error);
+          console.error("❌ Error:", error);
+        }
+      });
+    });
+  </script>
 </body>
 </html>
