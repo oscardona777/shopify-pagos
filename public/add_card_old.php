@@ -3,16 +3,16 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Agregar Tarjeta</title>
+  <title>Agregar Tarjeta - Paymentez</title>
   <script src="https://cdn.paymentez.com/ccapi/sdk/payment_sdk_stable.min.js" charset="UTF-8"></script>
 </head>
 <body>
   <h2>Agregar nueva tarjeta</h2>
 
-  <!-- Formulario generado dinámicamente -->
+  <!-- Contenedor donde el SDK insertará los campos -->
   <div id="card-form"></div>
 
-  <!-- Botón para guardar -->
+  <!-- Botón para enviar el formulario -->
   <button id="save-card-btn">Guardar tarjeta</button>
 
   <script>
@@ -23,7 +23,7 @@
       "<?php echo PAYMENTEZ_APP_KEY; ?>"
     );
 
-    // Configuración del formulario
+    // Datos necesarios para la tokenización
     const tokenizeData = {
       locale: 'es',
       user: {
@@ -35,33 +35,30 @@
       }
     };
 
-    // Renderiza los campos del formulario
+    // Genera el formulario de tarjeta en el contenedor #card-form
     pg_sdk.generate_tokenize(tokenizeData, '#card-form', onTokenizeResponse, onFormIncomplete);
 
-    // Evento del botón
+    // Botón para ejecutar la tokenización
     document.getElementById('save-card-btn').addEventListener('click', function (e) {
       e.preventDefault();
-      pg_sdk.tokenize();
+      pg_sdk.tokenize(); // ejecuta la tokenización de los datos ingresados
     });
 
-    // Callback cuando se genera el token
+    // Callback exitoso
     function onTokenizeResponse(response) {
-      console.log("📦 Respuesta del SDK:", response);
-
-      if (response && response.card && typeof response.card.token === 'string') {
-        const token = response.card.token;
-        console.log("✅ Token generado:", token);
-        alert("Token generado exitosamente: " + token);
+      if (response.card && response.card.token) {
+        console.log("✅ Tarjeta tokenizada:", response);
+        alert("Token generado: " + response.card.token);
       } else {
-        console.warn("❌ Token no recibido o estructura inválida:", response);
-        alert("No se generó un token válido.");
+        console.warn("⚠️ Respuesta sin token:", response);
+        alert("No se pudo obtener el token.");
       }
     }
 
-    // Callback si el formulario está incompleto o con errores
+    // Callback de error o formulario incompleto
     function onFormIncomplete(error) {
-      console.warn("⚠️ Formulario incompleto:", error);
-      alert("Por favor completa correctamente los campos.");
+      console.error("❌ Formulario incompleto o inválido:", error);
+      alert("Formulario incompleto o con errores.");
     }
   </script>
 </body>
