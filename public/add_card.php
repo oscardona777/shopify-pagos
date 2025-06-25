@@ -10,6 +10,7 @@
   <h2>Agregar nueva tarjeta</h2>
   <div id="card-form"></div>
   <button id="save-card-btn">Guardar tarjeta</button>
+
   <script>
     const pg_sdk = new PaymentGateway(
       "<?php echo PAYMENTEZ_SANDBOX ? 'stg' : 'prod'; ?>",
