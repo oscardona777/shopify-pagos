@@ -1,6 +1,6 @@
 <?php
-define('PAYMENTEZ_APP_CODE', 'TU_APP_CODE_SANDBOX');
-define('PAYMENTEZ_APP_KEY', 'TU_APP_KEY_SANDBOX');
+define('PAYMENTEZ_APP_CODE', 'TESTECUADORSTG-EC-CLIENT');
+define('PAYMENTEZ_APP_KEY', 'd4pUmVHgVpw2mJ66rWwtfWaO2bAWV6X');
 define('PAYMENTEZ_SANDBOX', true);
 
 function get_headers_auth() {
