@@ -1,8 +1,8 @@
 <?php
 define('PAYMENTEZ_APP_CODE', 'TESTECUADORSTG-EC-CLIENT');
 define('PAYMENTEZ_APP_KEY', 'd4pUmVHgVpw2mJ66rWwtfWaO2bAWV6X');
-define('PAYMENTEZ_SERVER_APP_CODE', 'YOUR_SERVER_APP_CODE');
-define('PAYMENTEZ_SERVER_APP_KEY', 'YOUR_SERVER_APP_KEY');
+define('PAYMENTEZ_SERVER_APP_CODE', 'TESTECUADORSTG-EC-SERVER');
+define('PAYMENTEZ_SERVER_APP_KEY', '67vVmLALRrbSaQHiEer40gjb49peos');
 define('PAYMENTEZ_SANDBOX', true); // false en producción
 
 function get_headers_auth() {
