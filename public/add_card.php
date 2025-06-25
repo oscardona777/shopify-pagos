@@ -3,26 +3,27 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Agregar Tarjeta y Verificar</title>
+  <title>Agregar tarjeta y verificar</title>
   <script src="https://cdn.paymentez.com/ccapi/sdk/payment_sdk_stable.min.js" charset="UTF-8"></script>
 </head>
 <body>
   <h2>Agregar nueva tarjeta</h2>
 
-  <!-- Contenedor del formulario dinámico de Paymentez -->
+  <!-- Contenedor donde se carga el formulario del SDK -->
   <div id="card-form"></div>
 
-  <!-- Botón para tokenizar -->
+  <!-- Botón que dispara la tokenización -->
   <button id="save-card-btn">Guardar tarjeta</button>
 
   <script>
-    // Inicializa el SDK de Paymentez
+    // Inicializar el SDK
     const pg_sdk = new PaymentGateway(
       "<?php echo PAYMENTEZ_SANDBOX ? 'stg' : 'prod'; ?>",
       "<?php echo PAYMENTEZ_APP_CODE; ?>",
       "<?php echo PAYMENTEZ_APP_KEY; ?>"
     );
 
+    // Configuración básica para el usuario
     const tokenizeData = {
       locale: 'es',
       user: {
@@ -34,14 +35,16 @@
       }
     };
 
-    // Genera el formulario dinámico
+    // Renderiza el formulario dinámico en el contenedor
     pg_sdk.generate_tokenize(tokenizeData, '#card-form', onTokenizeResponse, onFormIncomplete);
 
+    // Evento para tokenizar al hacer clic
     document.getElementById('save-card-btn').addEventListener('click', function (e) {
       e.preventDefault();
-      pg_sdk.tokenize(); // dispara el proceso de tokenización
+      pg_sdk.tokenize();
     });
 
+    // Callback de éxito en tokenización
     function onTokenizeResponse(response) {
       console.log("📦 Respuesta del SDK:", response);
 
@@ -49,7 +52,7 @@
         const token = response.card.token;
         alert("✅ Token generado: " + token);
 
-        // Enviar a verify_card.php vía POST
+        // Verificar tarjeta automáticamente
         fetch('verify_card.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -57,27 +60,28 @@
         })
         .then(res => res.json())
         .then(data => {
-          console.log('🔍 Verificación de tarjeta:', data);
+          console.log('🔍 Verificación:', data);
           if (data.verify?.success) {
             alert('✅ Verificación exitosa: ' + data.verify.message);
           } else {
-            alert('⚠️ Verificación fallida o parcial');
+            alert('⚠️ Verificación no confirmada');
           }
         })
-        .catch(error => {
-          console.error('❌ Error verificando tarjeta:', error);
+        .catch(err => {
+          console.error('❌ Error verificando tarjeta:', err);
           alert('Error verificando tarjeta.');
         });
 
       } else {
-        console.warn("❌ Token no recibido o estructura inesperada:", response);
+        console.warn("❌ Token no recibido o estructura inválida:", response);
         alert("No se generó un token válido.");
       }
     }
 
+    // Callback de error por formulario incompleto
     function onFormIncomplete(error) {
       console.warn("⚠️ Formulario incompleto:", error);
-      alert("Faltan datos o hay errores.");
+      alert("Por favor, completa correctamente los campos de la tarjeta.");
     }
   </script>
 </body>
