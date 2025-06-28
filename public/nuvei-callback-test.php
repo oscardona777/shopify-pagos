@@ -12,8 +12,8 @@ if (!file_exists($logDir)) {
 $input = file_get_contents("php://input");
 
 // 🧾 Guardar en log con fecha
-//$logFile = $logDir . '/callback_log.txt';
-$logFile = $logDir . 'https://07ff-2800-bf0-4580-20d9-3c7d-7e45-a49b-e215.ngrok-free.app/test-final/checkout/callback_log.txt';
+$logFile = $logDir . '/callback_log.txt';
+
 file_put_contents($logFile, date("Y-m-d H:i:s") . "\n" . $input . "\n\n", FILE_APPEND);
 
 // 🧠 Decodificar JSON (por si quieres procesar)
