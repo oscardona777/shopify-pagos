@@ -1,7 +1,14 @@
 <?php
-include 'config.php'; // Asegúrate que define PAYMENTEZ_SERVER_APP_KEY
+// Permitir solicitudes desde cualquier origen (solo para pruebas)
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
 
-header('Content-Type: application/json');
+// Manejar preflight OPTIONS
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
 
 // 1. Leer y decodificar el JSON crudo
 $inputJSON = file_get_contents('php://input');
