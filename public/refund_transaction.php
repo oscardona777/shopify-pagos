@@ -1,4 +1,5 @@
 <?php
+header('Content-Type: application/json');
 include 'config.php';
 header('Content-Type: application/json');
 
@@ -10,7 +11,7 @@ if (!$transaction_reference) {
     exit;
 }
 
-// 2. Leer parámetros opcionales
+// 2. Leer parÃ¡metros opcionales
 $amount = isset($_POST['amount']) ? floatval($_POST['amount']) : null;
 
 // 3. Construir payload
@@ -56,7 +57,7 @@ if (isset($response_array['status']) && $response_array['status'] === 'success')
         curl_close($ch_cb);
     }
 
-    // Opcional: también enviar a webhook.site (para pruebas)
+    // Opcional: tambiÃ©n enviar a webhook.site (para pruebas)
     //$debug_url = 'https://webhook.site/6810f4af-d15c-4caf-9b99-d95905ef73ce';
     //$ch_debug = curl_init($debug_url);
     //curl_setopt($ch_debug, CURLOPT_POST, 1);
