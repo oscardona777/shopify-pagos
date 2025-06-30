@@ -1,5 +1,4 @@
 <?php
-ob_start();
 header('Content-Type: application/json');
 
 define('PAYMENTEZ_APP_CODE', 'TESTECUADORSTG-EC-CLIENT');
