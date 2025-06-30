@@ -1,4 +1,5 @@
 ﻿<?php
+ob_start();
 include 'config.php';
 
 // Redirigir si no vienen datos del formulario
@@ -16,6 +17,7 @@ $user_id = $_POST['user_id'];
 $email = $_POST['email'];
 $amount = $_POST['amount'];
 $description = $_POST['description'];
+<?php ob_end_flush();
 ?>
 <!DOCTYPE html>
 <html lang="es">
