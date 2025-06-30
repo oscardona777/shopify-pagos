@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 ob_start();
 include 'config.php';
 
@@ -17,7 +17,8 @@ $user_id = $_POST['user_id'];
 $email = $_POST['email'];
 $amount = $_POST['amount'];
 $description = $_POST['description'];
-<?php ob_end_flush();
+
+ob_end_flush();
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -82,7 +83,7 @@ $description = $_POST['description'];
       border: 1px solid #ccc;
       border-radius: 8px;
       text-align: left;
-      display: none; /* ocultos por defecto */
+      display: none;
     }
   </style>
 </head>
@@ -106,7 +107,6 @@ $description = $_POST['description'];
       console.log("📩 Respuesta del modal:", response);
       const trans = response.transaction;
 
-      // Enviar manualmente al callback
       fetch("<?= $CALLBACK_URL ?>", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
