@@ -3,8 +3,6 @@ ob_start();
 header('Content-Type: application/json');
 include 'config.php';
 
-header('Content-Type: application/json');
-
 // 💰 Monto e impuesto
 $amount = isset($_POST['amount']) ? floatval($_POST['amount']) : $DEFAULT_AMOUNT;
 $tax_percentage = $DEFAULT_TAX_PERCENTAGE;
@@ -31,14 +29,19 @@ $user = array(
 // 🌎 Idioma
 $locale = $_POST['locale'] ?? $DEFAULT_LOCALE;
 
-// ⚙️ Configuración de URLs de redirección
+// ⚙️ Configuración de URLs de redirección + estilo visual
 $conf = array(
     "success_url" => $SUCCESS_URL,
     "failure_url" => $FAILURE_URL,
     "pending_url" => $PENDING_URL,
     "review_url"  => $REVIEW_URL,
     "callback_url" => $CALLBACK_URL,
-    "expiration_minutes" => 15
+    "expiration_minutes" => 15,
+    "style_version" => "2",
+    "theme" => array(
+        "logo" => "https://cdn.paymentez.com/img/nv/nuvei_logo.png",
+        "primary_color" => "#FFB700"
+    )
 );
 
 // 🧾 Payload final
