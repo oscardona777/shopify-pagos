@@ -1,4 +1,5 @@
 <?php
+header('Content-Type: application/json');
 
 define('PAYMENTEZ_APP_CODE', 'TESTECUADORSTG-EC-CLIENT');
 define('PAYMENTEZ_APP_KEY', 'd4pUmVHgVpw2mJ66rWwtfWaO2bAWV6');
