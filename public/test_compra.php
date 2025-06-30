@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Simulación de Compra</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <style>
     * {
       box-sizing: border-box;
@@ -76,18 +77,18 @@
 
   <div class="form-container">
     <h2>Simulación de Compra</h2>
-    <form action="index.php" method="POST">
+    <form action="generar_url.php" method="POST">
       <label for="user_id">ID Usuario</label>
-      <input type="text" id="user_id" name="user_id" placeholder="ingrese un usuario abc123" required>
+      <input type="text" id="user_id" name="user_id" required>
 
       <label for="email">Correo electrónico</label>
-      <input type="email" id="email" name="email" placeholder="usuario@correo.com" required>
+      <input type="email" id="email" name="email" required>
 
       <label for="amount">Monto (USD)</label>
-      <input type="number" step="0.01" id="amount" name="amount" placeholder="ingrese un monto con iva incluido" required>
+      <input type="number" step="0.01" id="amount" name="amount" required>
 
       <label for="description">Descripción del pedido</label>
-      <input type="text" id="description" name="description" placeholder="Escriba un modelo de telefono" required>
+      <input type="text" id="description" name="description" required>
 
       <button type="submit">Iniciar Pago</button>
     </form>
@@ -97,3 +98,4 @@
 
 </body>
 </html>
+

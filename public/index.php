@@ -1,18 +1,41 @@
-<?php
+﻿<?php
 ob_start();
 include 'config.php';
 
-// Redirigir si no vienen datos del formulario
-if ($_SERVER['REQUEST_METHOD'] !== 'POST' || 
-    empty($_POST['user_id']) || 
-    empty($_POST['email']) || 
-    empty($_POST['amount']) || 
-    empty($_POST['description'])) {
+// Clave de cifrado de 32 caracteres (AES-256-CBC)
+$key = 'rV9!uZx4#WqLp2T7@Nc3$MfG8YjB6sAh';
+
+// Desencriptar si vienen datos cifrados por GET
+if (isset($_GET['data'])) {
+  $payload = base64_decode($_GET['data']);
+  $iv = substr($payload, 0, 16);
+  $ciphertext = substr($payload, 16);
+  $json = openssl_decrypt($ciphertext, 'AES-256-CBC', $key, OPENSSL_RAW_DATA, $iv);
+  $data = json_decode($json, true);
+
+  if (is_array($data)) {
+    $_POST['user_id'] = $data['user_id'];
+    $_POST['email'] = $data['email'];
+    $_POST['amount'] = $data['amount'];
+    $_POST['description'] = $data['description'];
+  } else {
+    header("Location: https://honorstore.ec");
+    exit;
+  }
+}
+
+// Redirigir si no hay datos válidos
+if (
+  empty($_POST['user_id']) || 
+  empty($_POST['email']) || 
+  empty($_POST['amount']) || 
+  empty($_POST['description'])
+) {
   header("Location: https://honorstore.ec");
   exit;
 }
 
-// Pasar datos a JS
+// Pasar a JS
 $user_id = $_POST['user_id'];
 $email = $_POST['email'];
 $amount = $_POST['amount'];
@@ -26,7 +49,6 @@ ob_end_flush();
   <meta charset="UTF-8">
   <title>Pago con Paymentez</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- SDK y jQuery -->
   <script src="https://code.jquery.com/jquery-3.5.0.min.js"></script>
   <script src="https://cdn.paymentez.com/ccapi/sdk/payment_checkout_3.0.0.min.js"></script>
   <style>
