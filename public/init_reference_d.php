@@ -42,7 +42,12 @@ $conf = array(
     "pending_url" => $PENDING_URL,
     "review_url"  => $REVIEW_URL,
     "callback_url" => $CALLBACK_URL,
-    "expiration_minutes" => 15
+    "expiration_minutes" => 15,
+    "style_version" => "2",
+    "theme" => array(
+        "logo" => "https://cdn.paymentez.com/img/nv/nuvei_logo.png",
+        "primary_color" => "#FFB700"
+    )
 );
 
 // 🧾 Payload final
