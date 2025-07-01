@@ -4,13 +4,13 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
-// Preflight check
+// Preflight
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit;
 }
 
-// 📦 Leer y parsear JSON recibido
+// Leer JSON recibido
 $inputJSON = file_get_contents('php://input');
 $input = json_decode($inputJSON, true);
 
@@ -25,18 +25,24 @@ if (!isset($input['transaction'])) {
     exit;
 }
 
-// 🧾 Extraer datos clave
+// Extraer campos clave
 $tx = $input['transaction'];
 $dev_reference = $tx['dev_reference'] ?? 'N/A';
 $transaction_id = $tx['id'] ?? 'N/A';
 $amount = $tx['amount'] ?? 0;
-$email = $tx['email'] ?? 'sin_email@honorstore.ec';
 $status = strtoupper($tx['status'] ?? '');
 $current_status = strtoupper($tx['current_status'] ?? $status);
 $estado_final = ($current_status === 'CANCELLED') ? 'CANCELLED' : $status;
 
-// 🔄 Reenviar callback (opcional)
-$callback_url = 'https://webhook.site/6810f4af-d15c-4caf-9b99-d95905ef73ce';
+// Extraer email desde dev_reference
+if (preg_match('/__correo=([^@]+@[^@]+)$/', $dev_reference, $matches)) {
+    $email = urldecode($matches[1]);
+} else {
+    $email = 'sin_email@honorstore.ec';
+}
+
+// Reenviar a webhook de monitoreo (opcional)
+$callback_url = getenv('CALLBACK_REDIRECT_URL') ?: 'https://webhook.site/6810f4af-d15c-4caf-9b99-d95905ef73ce';
 $payload_modificado = $input;
 $payload_modificado['transaction']['final_status'] = $estado_final;
 
@@ -48,38 +54,33 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_exec($ch);
 curl_close($ch);
 
-// 📧 Enviar correo al cliente con PHPMailer
+// Enviar correo usando PHPMailer
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-// Si usas instalación manual:
 require 'PHPMailer/PHPMailer.php';
 require 'PHPMailer/SMTP.php';
 require 'PHPMailer/Exception.php';
-
-// Si usas Composer, usa esto en lugar de lo anterior:
+// Si usas Composer, reemplaza lo anterior por:
 // require 'vendor/autoload.php';
 
 $mail = new PHPMailer(true);
-
 try {
-    // Config SMTP
     $mail->isSMTP();
     $mail->Host       = 'smtp.gmail.com';
     $mail->SMTPAuth   = true;
-    $mail->Username   = getenv('SMTP_USER');         // TU CORREO
-    $mail->Password   = getenv('SMTP_PASS');         // CONTRASEÑA DE APP
+    $mail->Username   = getenv('SMTP_USER');  // Tu correo Gmail
+    $mail->Password   = getenv('SMTP_PASS');  // Contraseña de aplicación
     $mail->SMTPSecure = 'tls';
     $mail->Port       = 587;
 
-    // Config mensaje
-    $mail->setFrom('cardona.cardona@gmail.com', 'HonorStore');
+    $mail->setFrom(getenv('SMTP_USER'), 'HonorStore');
     $mail->CharSet = 'UTF-8';
 
     if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $mail->addAddress($email);
     } else {
-        $mail->addAddress('backup@honorstore.ec'); // Fallback
+        $mail->addAddress('backup@honorstore.ec');
     }
 
     $mail->isHTML(true);
@@ -97,12 +98,13 @@ try {
     $correo_enviado = false;
 }
 
-// ✅ Confirmación final
+// Respuesta final
 http_response_code(200);
 echo json_encode([
     "success" => true,
     "transaction_id" => $transaction_id,
     "final_status" => $estado_final,
     "dev_reference" => $dev_reference,
-    "correo_enviado" => $correo_enviado
+    "correo_enviado" => $correo_enviado,
+    "email_extraido" => $email
 ]);
