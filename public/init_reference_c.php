@@ -1,110 +1,89 @@
 <?php
-// CORS headers
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type");
+ob_start();
+header('Content-Type: application/json');
+include 'config.php';
 
-// Preflight
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit;
-}
+// 💰 Monto e impuesto
+$amount = isset($_POST['amount']) ? floatval($_POST['amount']) : $DEFAULT_AMOUNT;
+$tax_percentage = $DEFAULT_TAX_PERCENTAGE;
+$vat = floatval(number_format(round(($amount / (1 + $tax_percentage)), 2) * $tax_percentage, 2, '.', ''));
+$taxable_amount = round($amount - $vat, 2);
 
-// Leer JSON recibido
-$inputJSON = file_get_contents('php://input');
-$input = json_decode($inputJSON, true);
+// 📦 Datos del pedido
+$order = array(
+    "amount" => $amount,
+    "vat" => $vat,
+    "description" => $_POST['description'] ?? $DEFAULT_DESCRIPTION,
+    //"dev_reference" => uniqid("ORDER_"),
+    "dev_reference" => uniqid("ORDER_") . "__correo=" . urlencode($_POST['email']),
+    "installments_type" => $DEFAULT_INSTALLMENTS_TYPE,
+    "installments" => $DEFAULT_INSTALLMENTS,
+    "currency" => $DEFAULT_CURRENCY
+);
 
-// Validación mínima
-if (!isset($input['transaction'])) {
-    http_response_code(400);
-    echo json_encode([
-        "success" => false,
-        "error" => "Transacción no recibida",
-        "debug_input" => $inputJSON
-    ]);
-    exit;
-}
+// 👤 Usuario
+$user = array(
+    "id" => $_POST['user_id'] ?? $DEFAULT_USER_ID,
+    "email" => $_POST['email'] ?? $DEFAULT_USER_EMAIL
+);
 
-// Extraer campos clave
-$tx = $input['transaction'];
-$dev_reference = $tx['dev_reference'] ?? 'N/A';
-$transaction_id = $tx['id'] ?? 'N/A';
-$amount = $tx['amount'] ?? 0;
-$status = strtoupper($tx['status'] ?? '');
-$current_status = strtoupper($tx['current_status'] ?? $status);
-$estado_final = ($current_status === 'CANCELLED') ? 'CANCELLED' : $status;
+// 🌎 Idioma
+$locale = $_POST['locale'] ?? $DEFAULT_LOCALE;
 
-// Extraer email desde dev_reference
-if (preg_match('/__correo=([^@]+@[^@]+)$/', $dev_reference, $matches)) {
-    $email = urldecode($matches[1]);
-} else {
-    $email = 'sin_email@honorstore.ec';
-}
+// ⚙️ Configuración de URLs de redirección + estilo visual
+$conf = array(
+    "success_url" => $SUCCESS_URL,
+    "failure_url" => $FAILURE_URL,
+    "pending_url" => $PENDING_URL,
+    "review_url"  => $REVIEW_URL,
+    "callback_url" => $CALLBACK_URL,
+    "expiration_minutes" => 15,
+    "style_version" => "2",
+    "theme" => array(
+        "logo" => "https://cdn.paymentez.com/img/nv/nuvei_logo.png",
+        "primary_color" => "#FFB700"
+    )
+);
 
-// Reenviar a webhook de monitoreo (opcional)
-$callback_url = getenv('CALLBACK_REDIRECT_URL') ?: 'https://webhook.site/6810f4af-d15c-4caf-9b99-d95905ef73ce';
-$payload_modificado = $input;
-$payload_modificado['transaction']['final_status'] = $estado_final;
+// 🧾 Payload final
+$payload = array(
+    "locale" => $locale,
+    "order" => $order,
+    "user" => $user,
+    "conf" => $conf
+);
 
-$ch = curl_init($callback_url);
-curl_setopt($ch, CURLOPT_POST, 1);
-curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload_modificado));
-curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+// 🌐 Endpoint
+$url = api_url('/v2/transaction/init_reference/');
+$headers = get_headers_auth_server();
+
+// 🚀 Ejecutar solicitud
+$ch = curl_init($url);
+curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_exec($ch);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+curl_setopt($ch, CURLOPT_POST, true);
+
+$response = curl_exec($ch);
+$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
-// Enviar correo usando PHPMailer
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
+// 📤 Devolver respuesta al frontend
+$response_data = json_decode($response, true);
 
-require 'PHPMailer/PHPMailer.php';
-require 'PHPMailer/SMTP.php';
-require 'PHPMailer/Exception.php';
-// Si usas Composer, reemplaza lo anterior por:
-// require 'vendor/autoload.php';
-
-$mail = new PHPMailer(true);
-try {
-    $mail->isSMTP();
-    $mail->Host       = 'smtp.gmail.com';
-    $mail->SMTPAuth   = true;
-    $mail->Username   = getenv('SMTP_USER');  // Tu correo Gmail
-    $mail->Password   = getenv('SMTP_PASS');  // Contraseña de aplicación
-    $mail->SMTPSecure = 'tls';
-    $mail->Port       = 587;
-
-    $mail->setFrom(getenv('SMTP_USER'), 'HonorStore');
-    $mail->CharSet = 'UTF-8';
-
-    if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $mail->addAddress($email);
-    } else {
-        $mail->addAddress('backup@honorstore.ec');
-    }
-
-    $mail->isHTML(true);
-    $mail->Subject = "🧾 Transacción: {$estado_final}";
-    $mail->Body = "
-        <h2>📄 Detalles de la transacción</h2>
-        <p><strong>Nro de orden:</strong> {$dev_reference}</p>
-        <p><strong>Valor:</strong> \${$amount}</p>
-        <p><strong>Estado final:</strong> {$estado_final}</p>
-    ";
-
-    $mail->send();
-    $correo_enviado = true;
-} catch (Exception $e) {
-    $correo_enviado = false;
+if ($http_code === 200 && isset($response_data['reference'])) {
+    echo json_encode(array(
+        "success" => true,
+        "reference" => $response_data['reference'],
+        "checkout_url" => $response_data['checkout_url'],
+        "dev_reference" => $order["dev_reference"]
+    ));
+} else {
+    echo json_encode(array(
+        "success" => false,
+        "error" => isset($response_data['detail']) ? $response_data['detail'] : 'Error inesperado al generar la referencia',
+        "http_code" => $http_code,
+        "raw_response" => $response
+    ));
 }
-
-// Respuesta final
-http_response_code(200);
-echo json_encode([
-    "success" => true,
-    "transaction_id" => $transaction_id,
-    "final_status" => $estado_final,
-    "dev_reference" => $dev_reference,
-    "correo_enviado" => $correo_enviado,
-    "email_extraido" => $email
-]);
+?>
