@@ -14,7 +14,8 @@ $order = array(
     "amount" => $amount,
     "vat" => $vat,
     "description" => $_POST['description'] ?? $DEFAULT_DESCRIPTION,
-    "dev_reference" => uniqid("ORDER_"),
+    //"dev_reference" => uniqid("ORDER_"),
+    "dev_reference" => uniqid("ORDER_") . "__correo=" . urlencode($_POST['email']),
     "installments_type" => $DEFAULT_INSTALLMENTS_TYPE,
     "installments" => $DEFAULT_INSTALLMENTS,
     "currency" => $DEFAULT_CURRENCY
