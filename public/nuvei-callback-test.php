@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-// Leer JSON recibido
+// Leer y parsear input
 $inputJSON = file_get_contents('php://input');
 $input = json_decode($inputJSON, true);
 
@@ -34,19 +34,20 @@ $status = strtoupper($tx['status'] ?? '');
 $current_status = strtoupper($tx['current_status'] ?? $status);
 $estado_final = ($current_status === 'CANCELLED') ? 'CANCELLED' : $status;
 
-// Extraer email desde dev_reference
+// Extraer el correo desde el dev_reference (codificado como %40)
 if (preg_match('/__correo=([a-zA-Z0-9.%_+-]+%40[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/', $dev_reference, $matches)) {
     $email = urldecode($matches[1]);
 } else {
     $email = 'sin_email@honorstore.ec';
 }
 
-
-// Reenviar a webhook de monitoreo (opcional)
-$callback_url = getenv('CALLBACK_REDIRECT_URL') ?: 'https://webhook.site/6810f4af-d15c-4caf-9b99-d95905ef73ce';
+// Reconstruir payload modificado
 $payload_modificado = $input;
 $payload_modificado['transaction']['final_status'] = $estado_final;
+$payload_modificado['transaction']['email'] = $email; // ← Campo nuevo visible
 
+// Enviar callback a backend o webhook.site
+$callback_url = getenv('CALLBACK_REDIRECT_URL') ?: 'https://webhook.site/6810f4af-d15c-4caf-9b99-d95905ef73ce';
 $ch = curl_init($callback_url);
 curl_setopt($ch, CURLOPT_POST, 1);
 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload_modificado));
@@ -55,23 +56,22 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_exec($ch);
 curl_close($ch);
 
-// Enviar correo usando PHPMailer
+// Enviar correo al cliente
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 require 'PHPMailer/PHPMailer.php';
 require 'PHPMailer/SMTP.php';
 require 'PHPMailer/Exception.php';
-// Si usas Composer, reemplaza lo anterior por:
-// require 'vendor/autoload.php';
+// Si usas Composer, reemplaza por: require 'vendor/autoload.php';
 
 $mail = new PHPMailer(true);
 try {
     $mail->isSMTP();
     $mail->Host       = 'smtp.gmail.com';
     $mail->SMTPAuth   = true;
-    $mail->Username   = getenv('SMTP_USER');  // Tu correo Gmail
-    $mail->Password   = getenv('SMTP_PASS');  // Contraseña de aplicación
+    $mail->Username   = getenv('SMTP_USER');
+    $mail->Password   = getenv('SMTP_PASS');
     $mail->SMTPSecure = 'tls';
     $mail->Port       = 587;
 
@@ -99,13 +99,13 @@ try {
     $correo_enviado = false;
 }
 
-// Respuesta final
+// Respuesta JSON
 http_response_code(200);
 echo json_encode([
     "success" => true,
     "transaction_id" => $transaction_id,
     "final_status" => $estado_final,
     "dev_reference" => $dev_reference,
-    "correo_enviado" => $correo_enviado,
-    "email_extraido" => $email
+    "email" => $email,
+    "correo_enviado" => $correo_enviado
 ]);
