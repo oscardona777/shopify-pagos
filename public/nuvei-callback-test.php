@@ -35,7 +35,7 @@ $current_status = strtoupper($tx['current_status'] ?? $status);
 $estado_final = ($current_status === 'CANCELLED') ? 'CANCELLED' : $status;
 
 // Extraer email desde dev_reference
-if (preg_match('/__correo=([^&\s]+)/', $dev_reference, $matches)) {
+if (preg_match('/__correo=([a-zA-Z0-9.%_+-]+%40[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/', $dev_reference, $matches)) {
     $email = urldecode($matches[1]);
 } else {
     $email = 'sin_email@honorstore.ec';
