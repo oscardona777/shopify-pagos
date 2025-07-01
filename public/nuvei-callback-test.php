@@ -74,6 +74,7 @@ try {
 
     // Config mensaje
     $mail->setFrom('cardona.cardona@gmail.com', 'HonorStore');
+    $mail->CharSet = 'UTF-8';
 
     if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $mail->addAddress($email);
