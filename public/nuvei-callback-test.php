@@ -34,17 +34,21 @@ $status = strtoupper($tx['status'] ?? '');
 $current_status = strtoupper($tx['current_status'] ?? $status);
 $estado_final = ($current_status === 'CANCELLED') ? 'CANCELLED' : $status;
 
-// Extraer el correo desde el dev_reference (codificado como %40)
+// Extraer el correo desde dev_reference
 if (preg_match('/__correo=([a-zA-Z0-9.%_+-]+%40[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/', $dev_reference, $matches)) {
     $email = urldecode($matches[1]);
 } else {
     $email = 'sin_email@honorstore.ec';
 }
 
-// Reconstruir payload modificado
+// Limpiar dev_reference → solo ID de orden
+$dev_reference = explode('__', $dev_reference)[0];
+
+// Reflejar los cambios en el payload que se reenviará
 $payload_modificado = $input;
 $payload_modificado['transaction']['final_status'] = $estado_final;
-$payload_modificado['transaction']['email'] = $email; // ← Campo nuevo visible
+$payload_modificado['transaction']['email'] = $email;
+$payload_modificado['transaction']['dev_reference'] = $dev_reference;
 
 // Enviar callback a backend o webhook.site
 $callback_url = getenv('CALLBACK_REDIRECT_URL') ?: 'https://webhook.site/6810f4af-d15c-4caf-9b99-d95905ef73ce';
