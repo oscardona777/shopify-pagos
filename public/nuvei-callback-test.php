@@ -67,8 +67,8 @@ try {
     $mail->isSMTP();
     $mail->Host       = 'smtp.gmail.com';
     $mail->SMTPAuth   = true;
-    $mail->Username   = 'cardona.cardona@gmail.com';         // TU CORREO
-    $mail->Password   = 'AQUI_TU_CONTRASEÑA_DE_APP';         // CONTRASEÑA DE APP
+    $mail->Username   = getenv('SMTP_USER');         // TU CORREO
+    $mail->Password   = getenv('SMTP_PASS');         // CONTRASEÑA DE APP
     $mail->SMTPSecure = 'tls';
     $mail->Port       = 587;
 
