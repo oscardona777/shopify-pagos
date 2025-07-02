@@ -133,7 +133,7 @@ if ($estado_final === 'APPROVED') {
     curl_setopt($ch_cancel, CURLOPT_POSTFIELDS, json_encode($cancel_data));
     curl_setopt($ch_cancel, CURLOPT_HTTPHEADER, [
         'Content-Type: application/json',
-        'X-Shopify-Access-Token: ' . $SHOPIFY_ACCESS_TOKEN
+        'X-Shopify-Access-Token: ' . getenv('SHOPIFY_ACCESS_TOKEN')
     ]);
     $response_cancel = curl_exec($ch_cancel);
     $code_cancel = curl_getinfo($ch_cancel, CURLINFO_HTTP_CODE);
