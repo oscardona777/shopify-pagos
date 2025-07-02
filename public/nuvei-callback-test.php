@@ -96,7 +96,7 @@ try {
 
 // 🔁 Enviar evento a Shopify
 $shopify_notificado = false;
-$shopify_url_base = $SHOPIFY_STORE_URL . "/admin/api/2024-04/orders/{$order_id}";
+$shopify_url_base = $SHOPIFY_STORE_URL . "/admin/api/2024-01/orders/{$order_id}";
 
 if ($estado_final === 'APPROVED') {
     $tx_url = $shopify_url_base . "/transactions.json";
