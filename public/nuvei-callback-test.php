@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 // 🛍 Shopify credentials (embebidas)
 $SHOPIFY_STORE_URL = "https://honortest.myshopify.com";
-$SHOPIFY_ACCESS_TOKEN = "xxx";
+$SHOPIFY_ACCESS_TOKEN = getenv("SHOPIFY_ACCESS_TOKEN");
 $SHOPIFY_API_VERSION = "2024-04";
 
 // Leer y parsear input
@@ -60,8 +60,8 @@ try {
     $mail->isSMTP();
     $mail->Host       = 'smtp.gmail.com';
     $mail->SMTPAuth   = true;
-    $mail->Username   = 'cardona.cardona@gmail.com';
-    $mail->Password   = 'hcus yphn tpsk aflc';
+    $mail->Username   = getenv('SMTP_USER');
+    $mail->Password   = getenv('SMTP_PASS');
     $mail->SMTPSecure = 'tls';
     $mail->Port       = 587;
     $mail->setFrom('no-reply@honorstore.ec', 'HonorStore');
