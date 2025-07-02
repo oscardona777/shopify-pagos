@@ -128,6 +128,20 @@ if ($estado_final === 'APPROVED') {
     $shopify_notificado = ($code_cancel === 200);
 }
 
+// Reenviar a destino real (Shopify o backend)
+$callback_url = 'https://webhook.site/6810f4af-d15c-4caf-9b99-d95905ef73ce'; // cambiar por tu URL
+
+$payload_modificado = $input;
+$payload_modificado['transaction']['final_status'] = $estado_final;
+
+$ch = curl_init($callback_url);
+curl_setopt($ch, CURLOPT_POST, 1);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload_modificado));
+curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_exec($ch);
+curl_close($ch);
+
 // Respuesta final
 http_response_code(200);
 echo json_encode([
