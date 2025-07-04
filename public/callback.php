@@ -50,13 +50,13 @@ $correo_enviado = false;
 try {
     $mail = new PHPMailer(true);
     $mail->isSMTP();
-    $mail->Host       = SMTP_HOST;
+    $mail->Host       = 'smtp.gmail.com';
     $mail->SMTPAuth   = true;
-    $mail->Username   = SMTP_USER;
-    $mail->Password   = SMTP_PASS;
+    $mail->Username   = getenv('SMTP_USER');
+    $mail->Password   = getenv('SMTP_PASS');
     $mail->SMTPSecure = 'tls';
-    $mail->Port       = SMTP_PORT;
-    $mail->setFrom(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
+    $mail->Port       = 587;
+    $mail->setFrom('no-reply@honorstore.ec', 'HonorStore');
     $mail->addAddress(filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : 'backup@honorstore.ec');
     $mail->CharSet = 'UTF-8';
     $mail->isHTML(true);
@@ -97,7 +97,7 @@ try {
 
 // 🔁 Shopify mutación GraphQL
 function ejecutarMutacionShopify($query) {
-    global $SHOPIFY_STORE_URL, $SHOPIFY_ACCESS_TOKEN;
+    global getenv('SHOPIFY_STORE_URL'), getenv('SHOPIFY_ACCESS_TOKEN');
     $url = "$SHOPIFY_STORE_URL/admin/api/2024-01/graphql.json";
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -105,7 +105,7 @@ function ejecutarMutacionShopify($query) {
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(["query" => $query]));
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         "Content-Type: application/json",
-        "X-Shopify-Access-Token: {$SHOPIFY_ACCESS_TOKEN}"
+        "X-Shopify-Access-Token: {getenv('SHOPIFY_ACCESS_TOKEN')}"
     ]);
     $res = curl_exec($ch);
     if (curl_errno($ch)) {
