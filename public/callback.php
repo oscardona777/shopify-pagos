@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // ⚙️ CORS
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
@@ -97,15 +97,17 @@ try {
 
 // 🔁 Shopify mutación GraphQL
 function ejecutarMutacionShopify($query) {
-    global getenv('SHOPIFY_STORE_URL'), getenv('SHOPIFY_ACCESS_TOKEN');
-    $url = "$SHOPIFY_STORE_URL/admin/api/2024-01/graphql.json";
+    $store_url = getenv('SHOPIFY_STORE_URL');
+    $access_token = getenv('SHOPIFY_ACCESS_TOKEN');
+
+    $url = "$store_url/admin/api/2024-01/graphql.json";
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POST, 1);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(["query" => $query]));
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         "Content-Type: application/json",
-        "X-Shopify-Access-Token: " . getenv('SHOPIFY_ACCESS_TOKEN')
+        "X-Shopify-Access-Token: $access_token"
     ]);
     $res = curl_exec($ch);
     if (curl_errno($ch)) {
