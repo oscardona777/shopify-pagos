@@ -105,7 +105,7 @@ function ejecutarMutacionShopify($query) {
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(["query" => $query]));
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         "Content-Type: application/json",
-        "X-Shopify-Access-Token: {getenv('SHOPIFY_ACCESS_TOKEN')}"
+        "X-Shopify-Access-Token: " . getenv('SHOPIFY_ACCESS_TOKEN')
     ]);
     $res = curl_exec($ch);
     if (curl_errno($ch)) {
